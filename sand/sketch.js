@@ -84,7 +84,7 @@ function pixelEmpty(x, y) {
 		&& y >= 0
 		&& x < res
 		&& y < res	
-		&& pixels[x][y].z == 0
+		&& pixels[x][y].z == EMPTY
 }
 
 function notLastRow(y) {
@@ -92,6 +92,9 @@ function notLastRow(y) {
 }
 
 function switchCell(newCellType) {
+	const mouseOutsideOfCanvas = mouseX < 0 || mouseX >= width || mouseY < 0 || mouseY >= height;
+	if (mouseOutsideOfCanvas) return;
+
 	const row = floor(mouseY / scale)
 	const col = floor(mouseX / scale)
 	if (removeMode) {
