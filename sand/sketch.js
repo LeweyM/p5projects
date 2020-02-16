@@ -4,91 +4,87 @@ const EMPTY = 0;
 const SAND = 1;
 const WALL = 2;
 const cellTypeMap = {
-	"EMPTY" : 0,
-	"SAND" : 1,
-	"WALL" : 2
+	"EMPTY": 0,
+	"SAND": 1,
+	"WALL": 2
 }
 const res = 50
 const scale = 400 / res
 
-const pixels = []
+let referencePixels;
+let copyPixels = []
+
 let removeMode = false
 let activeCellType = "SAND"
-
 
 function setup() {
 	const cnv = createCanvas(400, 400)
 
+	referencePixels = new ReferencePixels(res)
+
 	cnv.mousePressed(() => {
 		const row = floor(mouseY / scale)
 		const col = floor(mouseX / scale)
-		if (pixels[col][row].z != EMPTY) {
+		if (!referencePixels.isEmpty(col, row)) {
 			removeMode = true
 		}
-	}) 
+	})
 	cnv.mouseReleased(() => {
-		console.log("released")
 		removeMode = false
 	})
 
 	const sandButton = createButton("sand")
 	sandButton.position(10, 10)
-	sandButton.mousePressed(() => {activeCellType = "SAND"})
+	sandButton.mousePressed(() => { activeCellType = "SAND" })
 
 
 	const wallButton = createButton("wall")
 	wallButton.position(50, 10)
-	wallButton.mousePressed(() => {activeCellType = "WALL"})
+	wallButton.mousePressed(() => { activeCellType = "WALL" })
 
 	for (let i = 0; i < res; i++) {
-		const row = []
+		const copyRow = []
 		for (let j = 0; j < res; j++) {
-			row.push(createVector(i * scale, j * scale, 0))
+			copyRow.push(createVector(i * scale, j * scale, EMPTY))
 		}
-		pixels.push(row)
+		copyPixels.push(copyRow)
 	}
 
 }
 
 function processSand(x, y) {
-	if (pixels[x][y].z == 1 && notLastRow(y)) {
-		if (pixelEmpty(x, y + 1)) {
-			moveCellDown(x, y)
-		} else {
-			if (pixelEmpty(x - 1, y + 1)) {
-				moveCellDownLeft(x, y, pixels)
-			} else if (pixelEmpty(x + 1, y + 1)) {
-				moveCellDownRight(x, y, pixels)
-			}
+	if (referencePixels.isSand(x, y) && notLastRow(y)) {
+		if (isPixelEmpty(x, y + 1)) {
+			moveCellDown(x, y, copyPixels)
+		} else if (isPixelEmpty(x - 1, y + 1)) {
+			moveCellDownLeft(x, y, copyPixels)
+		} else if (isPixelEmpty(x + 1, y + 1)) {
+			moveCellDownRight(x, y, copyPixels)
 		}
 	}
 }
 
-function moveCellDown(x, y) {
-	pixels[x][y].z = 0
-	pixels[x][y + 1].z = 1
+function moveCellDown(x, y, pixels) {
+	pixels[x][y].z = EMPTY
+	pixels[x][y + 1].z = SAND
 }
 
 function moveCellDownLeft(x, y, pixels) {
-	pixels[x][y].z = 0
-	pixels[x - 1][y + 1].z = 1	
+	pixels[x][y].z = EMPTY
+	pixels[x - 1][y + 1].z = SAND
 }
 
 function moveCellDownRight(x, y, pixels) {
-	pixels[x][y].z = 0
-	pixels[x + 1][y + 1].z = 1	
+	pixels[x][y].z = EMPTY
+	pixels[x + 1][y + 1].z = SAND
 }
 
-function pixelEmpty(x, y) {
-	return x >= 0 
-		&& y >= 0
-		&& x < res
-		&& y < res	
-		&& pixels[x][y].z == EMPTY
+function isPixelEmpty(x, y) {
+	return referencePixels.isEmpty(x, y)
 }
 
 function notLastRow(y) {
-	return y < pixels.length - 1 
+	return y < res - 1
 }
 
 function switchCell(newCellType) {
@@ -98,10 +94,22 @@ function switchCell(newCellType) {
 	const row = floor(mouseY / scale)
 	const col = floor(mouseX / scale)
 	if (removeMode) {
-		pixels[col][row].z = EMPTY
+		copyPixels[col][row].z = EMPTY
 	} else {
-		pixels[col][row].z = newCellType
+		copyPixels[col][row].z = newCellType
 	}
+}
+
+function copyGrid(pixels) {
+	const nextPixels = [];
+	for (row of pixels) {
+		const nextRow = [];
+		for (p of row) {
+			nextRow.push(p);
+		}
+		nextPixels.push(nextRow);
+	}
+	return nextPixels;
 }
 
 function draw() {
@@ -117,7 +125,7 @@ function draw() {
 		}
 	}
 
-	for (row of pixels) {
+	for (row of copyPixels) {
 		for (p of row) {
 			if (p.z == SAND) {
 				fill(255, 229, 170)
@@ -136,4 +144,9 @@ function draw() {
 			}
 		}
 	}
+
+	copyPixels = copyGrid(copyPixels)
+
+	referencePixels.copyFrom(copyPixels)
+
 }
