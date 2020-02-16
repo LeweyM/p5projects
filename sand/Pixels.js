@@ -9,26 +9,29 @@ class Pixels {
     }
 
     copyFrom(sourcePixels) {
-        this.pixels = createNewPixelGrid((x, y) => sourcePixels[x][y])
+        this.pixels = createNewPixelGrid((x, y) => {
+            const p = sourcePixels[x][y];
+            return createVector(p.x, p.y, p.z)
+        })
     }
 
-    draw() {
+    draw(offset = 0) {
         for (let row of this.pixels) {
             for (let p of row) {
                 if (p.z == SAND) {
                     fill(255, 229, 170)
                     noStroke()
-                    rect(p.x, p.y, 10, 10)
+                    rect(p.x + offset, p.y, scale, scale)
                 }
                 if (p.z == WALL) {
                     fill(0, 0, 0)
                     noStroke()
-                    rect(p.x, p.y, 10, 10)
+                    rect(p.x + offset, p.y, scale, scale)
                 }
                 if (p.z == EMPTY) {
                     fill(0, 229, 170)
                     noStroke()
-                    rect(p.x, p.y, 10, 10)
+                    rect(p.x + offset, p.y, scale, scale)
                 }
             }
         }

@@ -1,4 +1,5 @@
 /// <reference path="./p5.d/p5.global-mode.d.ts" />
+let stepperMode = true;
 
 const EMPTY = 0;
 const SAND = 1;
@@ -9,7 +10,7 @@ const cellTypeMap = {
 	"SAND": 1,
 	"WALL": 2
 }
-const res = 50
+const res = stepperMode ? 3 : 50
 const scale = 400 / res
 
 let referencePixels;
@@ -18,9 +19,29 @@ let pixels;
 
 let removeMode = false
 let activeCellType = "SAND"
+let focusedX;
+let focusedY;
+
+let stepper;
+const processStepper = function* () {
+	while (true) {
+		for (let i = 0; i < res; i++) {
+			for (let j = 0; j < res; j++) {
+				processSand(i, j)
+				focusedX = i
+				focusedY = j
+				yield
+			}
+		}
+		referencePixels.copyFrom(writerPixels.pixels)
+		writerPixels.copyFrom(writerPixels.pixels)
+	}
+};
 
 function setup() {
-	const cnv = createCanvas(400, 400)
+	const cnv = createCanvas(stepperMode ? 800 : 400, 400)
+
+	stepper = processStepper()
 
 	referencePixels = new ReferencePixels(res)
 	writerPixels = new WriterPixels(res)
@@ -37,12 +58,17 @@ function setup() {
 	})
 
 	const sandButton = createButton("sand")
-	sandButton.position(10, 10)
+	sandButton.position(10, 420)
 	sandButton.mousePressed(() => { activeCellType = "SAND" })
 
 	const wallButton = createButton("wall")
-	wallButton.position(50, 10)
+	wallButton.position(50, 420)
 	wallButton.mousePressed(() => { activeCellType = "WALL" })
+
+
+	const stepButton = createButton("step")
+	stepButton.position(350, 420)
+	stepButton.mousePressed(() => { stepper.next() })
 }
 
 function processSand(x, y) {
@@ -100,15 +126,29 @@ function draw() {
 		switchCell(cellTypeMap[activeCellType])
 	}
 
-	for (var i = res - 1; i >= 0; i--) {
-		for (var j = res - 1; j >= 0; j--) {
-			processSand(i, j)
+	if (!stepperMode) {
+		for (var i = res - 1; i >= 0; i--) {
+			for (var j = res - 1; j >= 0; j--) {
+				processSand(i, j)
+			}
 		}
 	}
 
+	referencePixels.copyFrom(writerPixels.pixels)
+	writerPixels.copyFrom(writerPixels.pixels)
+
 	writerPixels.draw()
 
-	writerPixels.copyFrom(referencePixels.pixels)
-	referencePixels.copyFrom(writerPixels.pixels)
+	if (stepperMode) {
+		referencePixels.draw(400)
+		strokeWeight(4);
+		stroke(51);
+		line(400, 0, 400, 400)
 
+		noFill()
+		strokeWeight(4);
+		stroke(51);
+		rect(focusedX * scale, focusedY * scale, scale, scale)
+		rect((focusedX * scale) + 400, focusedY * scale, scale, scale)
+	}
 }
