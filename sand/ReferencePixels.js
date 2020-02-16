@@ -1,19 +1,8 @@
 /// <reference path="./p5.d/p5.global-mode.d.ts" />
 
-class ReferencePixels {
-    pixels = [];
-    res;
-
+class ReferencePixels extends Pixels {
     constructor(res) {
-        this.res = res;
-
-        for (let i = 0; i < res; i++) {
-            const row = []
-            for (let j = 0; j < res; j++) {
-                row.push(createVector(i * scale, j * scale, EMPTY))
-            }
-            this.pixels.push(row)
-        }
+        super(res)
     }
 
     isEmpty(x, y) {
@@ -27,17 +16,5 @@ class ReferencePixels {
     seePixel(x, y) {
         const withinGrid = x >= 0 && y >= 0 && x < res && y < res;
         return withinGrid ? this.pixels[x][y].z : WALL
-    }
-
-    copyFrom(sourcePixels) {
-        const newPixels = []
-        for (let i = 0; i < res; i++) {
-            const row = []
-            for (let j = 0; j < res; j++) {
-                row.push(sourcePixels[i][j])
-            }
-            newPixels.push(row)
-        }
-        this.pixels = newPixels
     }
 } 

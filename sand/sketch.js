@@ -14,6 +14,7 @@ const scale = 400 / res
 
 let referencePixels;
 let writerPixels;
+let pixels;
 
 let removeMode = false
 let activeCellType = "SAND"
