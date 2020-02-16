@@ -51,9 +51,9 @@ class Pixels {
         if (this.isSand(x, y) && this.notLastRow(y)) {
             if (this.isPixelEmpty(x, y + 1)) {
                 this.moveCellDown(x, y)
-            } else if (this.isPixelEmpty(x - 1, y + 1)) {
+            } else if (this.isPixelEmpty(x - 1, y + 1) && this.isPixelEmpty(x - 1, y)) {
                 this.moveCellDownLeft(x, y)
-            } else if (this.isPixelEmpty(x + 1, y + 1)) {
+            } else if (this.isPixelEmpty(x + 1, y + 1) && this.isPixelEmpty(x + 1, y)) {
                 this.moveCellDownRight(x, y)
             }
         }

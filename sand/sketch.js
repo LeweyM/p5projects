@@ -1,5 +1,5 @@
 /// <reference path="./p5.d/p5.global-mode.d.ts" />
-let stepperMode = true;
+let stepperMode = false;
 
 const EMPTY = 0;
 const SAND = 1;
