@@ -72,9 +72,13 @@ function switchCell(newCellType) {
 	const row = floor(mouseY / scale)
 	const col = floor(mouseX / scale)
 	if (removeMode) {
-		pixels.set(col, row, EMPTY)
+		pixels.set(col, row, new EmptyCell(col, row))
 	} else {
-		pixels.set(col, row, newCellType)
+		if (newCellType == SAND) {
+			pixels.set(col, row, new SandCell(col, row))
+		} else {
+			pixels.set(col, row, new WallCell(col, row))
+		}
 	}
 }
 
