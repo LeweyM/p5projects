@@ -65,6 +65,18 @@ class Pixels {
         this.changedPixels.reset()
     }
 
+    processStepper = function* () {
+        while (true) {
+            for (var y = res - 1; y >= 0; y--) {
+                for (var x = res - 1; x >= 0; x--) {
+                    this.notLastRow(y) && this.pixels[x][y].process(this)
+                    yield({x, y})
+                }
+            }
+            this.changedPixels.reset()
+        }
+    };
+
     notLastRow(y) {
         return y < res - 1
     }
