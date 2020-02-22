@@ -1,18 +1,22 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 10;
-let grid;
+const res = 50;
+let AStar;
 
 function setup() {
 	createCanvas(400, 400);	
 	
-	grid = new Grid(res);
-	grid.setStart(3,3)
-	grid.setFinish(8,8)
+	AStar = new AStarGrid(res);
 }
 
 function draw() {
 	background(220)
+	
+	if (!AStar.hasFinished()) {
+		AStar.calculateNextCell()
+	} else {
+		AStar = new AStarGrid(res)
+	}
 
-	grid.draw()
+	AStar.draw()
 }
