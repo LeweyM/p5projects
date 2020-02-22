@@ -1,6 +1,6 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 50;
+const res = 20;
 let aStarGrid;
 let drawingMode = true;
 let goButton;
@@ -47,8 +47,11 @@ function draw() {
 }
 
 function drawWall() {
+	if (!mouseWithinCanvas()) return;
 	let scale = 400 / res
 	let row = floor(mouseX / scale)
 	let col = floor(mouseY / scale)
 	aStarGrid.setWall(row, col)
 }
+
+const mouseWithinCanvas = () => mouseX > 0 && mouseX <= 400 && mouseY > 0 && mouseY <= 400

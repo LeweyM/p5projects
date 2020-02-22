@@ -77,7 +77,7 @@ class AStarGrid {
         n.push(this.g[XYToIndex(x - 1, y)])
         n.push(this.g[XYToIndex(x - 1, y - 1)])
         return n
-            .filter(c => c != undefined)
+            .filter(c => !!c)
             .filter(c => !c.isWall);
     }
 
@@ -123,5 +123,6 @@ function cellFromPosition(row, col) {
 }
 
 function XYToIndex(x, y) {
+    if (x < 0 || x >= res || y < 0 || y >= res) return null
     return (y * res) + x;
 }
