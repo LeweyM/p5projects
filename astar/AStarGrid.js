@@ -11,15 +11,17 @@ class AStarGrid {
         this.initializeGrid()
     }
 
+    setWall(x, y) {
+        this.g[XYToIndex(x,y)].setWall()
+    }
+
     hasFinished() {
         return this.finished;
     }
 
     calculateNextCell() {
         let nextCell = this.getLowestValuedCell()
-        if (nextCell) {
-            this.setNeighbourParents(nextCell)
-        }
+        this.setNeighbourParents(nextCell)
         this.setCurrentRouteHead(nextCell)
         if (nextCell.positionVector.equals(this.finalCell.positionVector)) {
             this.finished = true;
@@ -27,7 +29,7 @@ class AStarGrid {
     }
 
     getLowestValuedCell() {
-        const closestToFinish = (a, b) => {
+        const closestToFinalCell = (a, b) => {
             let aDist = a.positionVector.dist(this.finalCell.positionVector)
             let bDist = b.positionVector.dist(this.finalCell.positionVector)
 
@@ -43,7 +45,7 @@ class AStarGrid {
         }
 
         let discoveredCells = this.g.filter(c => c.isDiscovered);
-        discoveredCells.sort(closestToFinish)
+        discoveredCells.sort(closestToFinalCell)
         return discoveredCells[0]
     }
 

@@ -8,6 +8,7 @@ class Cell {
     isFinish = false;
     isDiscovered = false;
     isRoute = false;
+    isWall = false;
     parent = null;
 
     constructor(x, y, positionVector) {
@@ -24,6 +25,10 @@ class Cell {
     setRouteHead() {
         this.isRoute = true;
         this.parent && this.parent.setRouteHead()
+    }
+
+    setWall() {
+        this.isWall = true;
     }
 
     draw() {
@@ -47,7 +52,12 @@ class Cell {
             textAlign(CENTER,CENTER)
             textSize(400/res/2)
             text("F", posVec.x, posVec.y, 400/res, 400/res)
-        } else if (this.isRoute) {
+        } else if (this.isWall) {
+            let posVec = this.positionVector;
+            stroke(0);
+            fill(0)
+            rect(posVec.x, posVec.y, 400 / res, 400 / res);
+        }else if (this.isRoute) {
             let posVec = this.positionVector;
             stroke(0);
             fill(202,0,42)
