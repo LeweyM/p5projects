@@ -4,6 +4,7 @@ class AStarGrid {
     res;
     g;
     finalCell;
+    startingCell;
     finished = false
 
     constructor(res) {
@@ -30,23 +31,20 @@ class AStarGrid {
     }
 
     getLowestValuedCell() {
-        const closestToFinalCell = (a, b) => {
-            let aDist = a.positionVector.dist(this.finalCell.positionVector)
-            let bDist = b.positionVector.dist(this.finalCell.positionVector)
+        const cellsByCostValue = (a, b) => {
+            let aHCost = a.positionVector.dist(this.finalCell.positionVector)
+            let aGCost = a.positionVector.dist(this.startingCell.positionVector)
+            let aCost = aHCost + aGCost
+            
+            let bHCost = b.positionVector.dist(this.finalCell.positionVector)
+            let bGCost = b.positionVector.dist(this.startingCell.positionVector)
+            let bCost = bHCost + bGCost
 
-            if (aDist > bDist) {
-                return 1
-            } 
-            if (aDist < bDist) {
-                return -1
-            } 
-            if (aDist == bDist) {
-                return 0
-            }
+            return aCost - bCost
         }
 
         let discoveredCells = this.g.filter(c => c.isDiscovered);
-        discoveredCells.sort(closestToFinalCell)
+        discoveredCells.sort(cellsByCostValue)
         if (discoveredCells.length > 0) {
             return discoveredCells.filter(c => !c.hasBeenTried)[0]
         }
@@ -85,14 +83,15 @@ class AStarGrid {
 
     setStart(x, y) {
         const cell = this.g[XYToIndex(x, y)];
+        this.startingCell = cell;
         cell.isStart = true;
         cell.isDiscovered = true;
     }
 
     setFinish(x, y) {
         const cell = this.g[XYToIndex(x, y)];
-        cell.isFinish = true;
         this.finalCell = cell
+        cell.isFinish = true;
     }
 
     draw() {
