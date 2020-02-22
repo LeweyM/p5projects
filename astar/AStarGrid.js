@@ -21,6 +21,7 @@ class AStarGrid {
 
     calculateNextCell() {
         let nextCell = this.getLowestValuedCell()
+        nextCell.hasBeenTried = true;
         this.setNeighbourParents(nextCell)
         this.setCurrentRouteHead(nextCell)
         if (nextCell.positionVector.equals(this.finalCell.positionVector)) {
@@ -46,7 +47,9 @@ class AStarGrid {
 
         let discoveredCells = this.g.filter(c => c.isDiscovered);
         discoveredCells.sort(closestToFinalCell)
-        return discoveredCells[0]
+        if (discoveredCells.length > 0) {
+            return discoveredCells.filter(c => !c.hasBeenTried)[0]
+        }
     }
 
     setNeighbourParents(parentCell) {
@@ -75,7 +78,9 @@ class AStarGrid {
         n.push(this.g[XYToIndex(x - 1, y + 1)])
         n.push(this.g[XYToIndex(x - 1, y)])
         n.push(this.g[XYToIndex(x - 1, y - 1)])
-        return n;
+        return n
+            .filter(c => c != undefined)
+            .filter(c => !c.isWall);
     }
 
     setStart(x, y) {

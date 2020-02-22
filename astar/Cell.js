@@ -7,6 +7,7 @@ class Cell {
     isStart = false;
     isFinish = false;
     isDiscovered = false;
+    hasBeenTried = false;
     isRoute = false;
     isWall = false;
     parent = null;

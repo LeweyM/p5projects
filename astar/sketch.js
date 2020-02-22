@@ -1,6 +1,6 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 20;
+const res = 50;
 let aStarGrid;
 let drawingMode = true;
 let goButton;
