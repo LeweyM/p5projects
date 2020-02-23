@@ -66,7 +66,7 @@ class Cell {
         } else if (this.isDiscovered) {
             let posVec = this.positionVector;
             stroke(0);
-            fill(20,20,20)
+            fill(220)
             rect(posVec.x, posVec.y, 400 / res, 400 / res);
         } else {
             let posVec = this.positionVector;
