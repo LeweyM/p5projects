@@ -1,10 +1,11 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 50;
+const res = 10;
 let aStarGrid;
 let drawingMode = true;
 let goButton;
 let resetButton;
+let stepButton;
 
 function setup() {
 	createCanvas(400, 400);	
@@ -23,6 +24,11 @@ function setup() {
 		aStarGrid = new AStarGrid(res)
 		randomWalls()
 		drawingMode = true
+	})
+	stepButton = createButton('Step');
+	stepButton.position(410, 20);
+	stepButton.mousePressed(() => {
+		loop()
 	})
 }
 
@@ -80,12 +86,17 @@ function draw() {
 		goButton.hide()
 		resetButton.show()
 		
-		if (!aStarGrid.hasFinished()) {
-			aStarGrid.calculateNextCell()
-		}
+		// if (!aStarGrid.hasFinished()) {
+		// 	aStarGrid.calculateNextCell()
+		// }
+		aStarGrid.fastestRoute()
 	}
 
 	aStarGrid.draw()
+
+	// if (!drawingMode) {
+	// 	noLoop()
+	// }
 }
 
 function drawWall() {

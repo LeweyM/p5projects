@@ -20,41 +20,67 @@ class AStarGrid {
         return this.finished;
     }
 
+    fastestRoute() {
+        while (!this.finished) {
+            this.calculateNextCell()
+        }
+    }
+
     calculateNextCell() {
         let nextCell = this.getLowestValuedCell()
-        nextCell.hasBeenTried = true;
+
+        if (!nextCell) {
+            this.finished = true;
+            return;
+        }
+
+        this.calculateNeighbours(nextCell)
+
         this.setNeighbourParents(nextCell)
-        this.setCurrentRouteHead(nextCell)
-        if (nextCell.positionVector.equals(this.finalCell.positionVector)) {
+        
+        if (nextCell == this.finalCell) {
+            this.setCurrentRouteHead(nextCell)
             this.finished = true;
         }
     }
 
     getLowestValuedCell() {
-        const cellsByCostValue = (a, b) => {
-            let aHCost = a.positionVector.dist(this.finalCell.positionVector)
-            let aGCost = a.positionVector.dist(this.startingCell.positionVector)
-            let aCost = aHCost + aGCost
-            
-            let bHCost = b.positionVector.dist(this.finalCell.positionVector)
-            let bGCost = b.positionVector.dist(this.startingCell.positionVector)
-            let bCost = bHCost + bGCost
-
+        const cellsByCost = (a, b) => {
+            let aCost = a.g + a.h
+            let bCost = b.g + b.h
             return aCost - bCost
         }
 
-        let discoveredCells = this.g.filter(c => c.isDiscovered);
-        discoveredCells.sort(cellsByCostValue)
-        if (discoveredCells.length > 0) {
-            return discoveredCells.filter(c => !c.hasBeenTried)[0]
-        }
+        let cellsToTry = this.g
+            .filter(c => c.isDiscovered)
+            .filter(c => !c.hasBeenTried)
+            .sort(cellsByCost)
+
+        if (cellsToTry.length <= 0) return false
+
+        return cellsToTry.filter(c => !c.hasBeenTried)[0]
+    }
+
+    calculateNeighbours(parentCell) {
+        parentCell.hasBeenTried = true;
+        this.getNeighbours(parentCell)
+            .filter(c => !c.hasBeenTried)
+            .forEach(cell => {
+                let g = parentCell.g + dist(parentCell.x, parentCell.y, cell.x, cell.y);
+                let h = dist(this.finalCell.x, this.finalCell.y, cell.x, cell.y)
+                if (g < cell.g) {
+                    cell.g = g;
+                    cell.parent = parentCell
+                }
+                cell.h = h;
+            })
     }
 
     setNeighbourParents(parentCell) {
-        let undiscoveredNeighbours = this.getNeighbours(parentCell).filter(n => !n.isDiscovered)
-        for (let n of undiscoveredNeighbours) {
-            n.discoverByParent(parentCell)
-        }
+        this.getNeighbours(parentCell)
+            .filter(c => !c.isDiscovered)
+            .filter(c => !c.hasBeenTried)
+            .forEach(c => c.discoverByParent(parentCell))
     }
 
     setCurrentRouteHead(headCell) {
@@ -78,20 +104,24 @@ class AStarGrid {
         n.push(this.g[XYToIndex(x - 1, y - 1)])
         return n
             .filter(c => !!c)
-            .filter(c => !c.isWall);
+            .filter(c => !c.isWall)
     }
 
     setStart(x, y) {
         const cell = this.g[XYToIndex(x, y)];
-        this.startingCell = cell;
         cell.isStart = true;
         cell.isDiscovered = true;
+        cell.g = 0
+        this.startingCell = cell;
     }
-
+    
     setFinish(x, y) {
         const cell = this.g[XYToIndex(x, y)];
-        this.finalCell = cell
         cell.isFinish = true;
+        cell.h = 0
+        this.finalCell = cell
+
+        this.startingCell.h = dist(this.startingCell.x, this.startingCell.y, this.finalCell.x, this.finalCell.y)
     }
 
     draw() {
@@ -108,11 +138,13 @@ class AStarGrid {
             }
         }
         this.g = pixels
-        function randInGrid() {
-            return round(random(1, res - 2));
-        }
-        this.setStart(randInGrid(),randInGrid())
-	    this.setFinish(randInGrid(),randInGrid())
+        this.setStart(0,0)
+        this.setFinish(res-1,res-1)
+        // function randInGrid() {
+        //     return round(random(1, res - 2));
+        // }
+        // this.setStart(randInGrid(),randInGrid())
+	    // this.setFinish(randInGrid(),randInGrid())
     }
 }
 
