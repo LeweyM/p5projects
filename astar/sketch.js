@@ -1,8 +1,24 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 10;
+const res = 25;
 let aStarGrid;
-let drawingMode = true;
+
+const auto = "AUTO"
+const drawing = "DRAWING"
+const stepping = "STEPPING"
+const animated = "ANIMATED"
+const modes = [auto, stepping, animated]
+let displayMode = auto
+
+const buttonFactory = (title, fn) => {
+	let btn = createButton(title);
+	btn.mousePressed(() => {
+		loop()
+		fn()
+	})
+	return btn 
+}
+
 let goButton;
 let resetButton;
 let stepButton;
@@ -11,24 +27,14 @@ function setup() {
 	createCanvas(400, 400);	
 	aStarGrid = new AStarGrid(res);
 	randomWalls()
-	goButton = createButton('Go');
-	goButton.position(410, 0);
-	goButton.mousePressed(() => {
-		if (drawingMode) {
-			drawingMode = false
-		} 
-	})
-	resetButton = createButton('Reset');
-	resetButton.position(410, 0);
-	resetButton.mousePressed(() => {
+
+	goButton = buttonFactory('Go', () => displayMode = animated)
+	pauseButton = buttonFactory('Pause', () => displayMode = stepping)	
+	stepButton = buttonFactory('Step', () => {})
+	resetButton = buttonFactory('Reset', () => {
 		aStarGrid = new AStarGrid(res)
 		randomWalls()
-		drawingMode = true
-	})
-	stepButton = createButton('Step');
-	stepButton.position(410, 20);
-	stepButton.mousePressed(() => {
-		loop()
+		displayMode = drawing
 	})
 }
 
@@ -74,32 +80,70 @@ function randomWalls() {
 
 function draw() {
 	background(220)
-
-	if (drawingMode) {
-		goButton.show()
-		resetButton.hide()
-
-		if (mouseIsPressed) {
-			drawWall()
-		}
+	hideButtons();
+	if (displayMode === auto) {
+		drawAutoRoute();
 	} else {
-		goButton.hide()
-		resetButton.show()
-		
-		// if (!aStarGrid.hasFinished()) {
-		// 	aStarGrid.calculateNextCell()
-		// }
-		aStarGrid.fastestRoute()
+		drawAnimatedRoute();
 	}
-
-	aStarGrid.draw()
-
-	// if (!drawingMode) {
-	// 	noLoop()
-	// }
 }
 
-function drawWall() {
+function hideButtons() {
+	resetButton.hide();
+	stepButton.hide();
+	goButton.hide();
+	pauseButton.hide();
+}
+
+function drawAutoRoute() {
+	pauseButton.show()
+	if (mouseIsPressed && mouseWithinCanvas()) {
+		aStarGrid.setFinish(floor(mouseX / (400 / res)), floor(mouseY / (400 / res)));
+		console.log("Time taken: ", deltaTime.toFixed(2), " ms");
+	}
+	aStarGrid.fastestRoute();
+	aStarGrid.draw();
+	loop();
+}
+
+function drawAnimatedRoute() {
+	if (displayMode === drawing) {
+		goButton.show();
+
+		if (mouseIsPressed && mouseWithinCanvas()) {
+			drawWallAtMouse()
+		}
+		
+		aStarGrid.draw();
+		loop();
+	}
+	
+	if (displayMode === stepping) {
+		stepButton.show()
+		resetButton.show()
+		goButton.show()
+		if (!aStarGrid.hasFinished()) {
+			aStarGrid.calculateNextCell();
+		}
+	
+		aStarGrid.draw();
+		noLoop();
+	} 
+
+	if (displayMode === animated) {
+		resetButton.show()
+		pauseButton.show()
+
+		if (!aStarGrid.hasFinished()) {
+			aStarGrid.calculateNextCell();
+		}
+	
+		aStarGrid.draw();
+		loop();
+	} 
+}
+
+function drawWallAtMouse() {
 	if (!mouseWithinCanvas()) return;
 	let scale = 400 / res
 	let row = floor(mouseX / scale)

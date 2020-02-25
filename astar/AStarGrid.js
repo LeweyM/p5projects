@@ -34,9 +34,9 @@ class AStarGrid {
             return;
         }
 
+        this.discoverNeighbours(nextCell)
+        
         this.calculateNeighbours(nextCell)
-
-        this.setNeighbourParents(nextCell)
         
         if (nextCell == this.finalCell) {
             this.setCurrentRouteHead(nextCell)
@@ -50,15 +50,15 @@ class AStarGrid {
             let bCost = b.g + b.h
             return aCost - bCost
         }
-
+        
         let cellsToTry = this.g
             .filter(c => c.isDiscovered)
             .filter(c => !c.hasBeenTried)
             .sort(cellsByCost)
-
+        
         if (cellsToTry.length <= 0) return false
 
-        return cellsToTry.filter(c => !c.hasBeenTried)[0]
+        return cellsToTry[0]
     }
 
     calculateNeighbours(parentCell) {
@@ -76,7 +76,7 @@ class AStarGrid {
             })
     }
 
-    setNeighbourParents(parentCell) {
+    discoverNeighbours(parentCell) {
         this.getNeighbours(parentCell)
             .filter(c => !c.isDiscovered)
             .filter(c => !c.hasBeenTried)
@@ -117,6 +117,9 @@ class AStarGrid {
     
     setFinish(x, y) {
         const cell = this.g[XYToIndex(x, y)];
+        if (cell.isWall) return
+
+        this.resetNonWallGrid()
         cell.isFinish = true;
         cell.h = 0
         this.finalCell = cell
@@ -130,6 +133,24 @@ class AStarGrid {
         }
     }
 
+    resetNonWallGrid() {
+        this.g
+            .filter(c => !c.isWall)
+            .filter(c => !c.isStart)
+            .forEach(c => {
+                c.g = Infinity
+                c.h = Infinity
+                c.isFinish = false;
+                c.isDiscovered = false;
+                c.hasBeenTried = false;
+                c.isRoute = false;
+                c.parent = null;
+            })
+        this.startingCell.isDiscovered = true;
+        this.startingCell.hasBeenTried = false;
+        this.finished = false;
+    }
+
     initializeGrid() {
         const pixels = [];
         for (let row = 0; row < res; row++) {
@@ -140,11 +161,6 @@ class AStarGrid {
         this.g = pixels
         this.setStart(0,0)
         this.setFinish(res-1,res-1)
-        // function randInGrid() {
-        //     return round(random(1, res - 2));
-        // }
-        // this.setStart(randInGrid(),randInGrid())
-	    // this.setFinish(randInGrid(),randInGrid())
     }
 }
 
