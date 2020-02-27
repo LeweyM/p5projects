@@ -8,27 +8,28 @@ class BinaryHeap {
         this.accessorFn = accessorFn
     }
 
-    push(value) {
-        this.bubbleUp(this.lastLeaf(), value)
+    push(valueObject) {
+        this.bubbleUp(this.lastLeaf(), valueObject)
     }
 
     pop() {
         if (this.heap.length == 0) return null
-        let root = this.heap[0]
         let last = this.heap.pop()
         if (this.heap.length == 0) return last
-        this.heap[0] = last
+        let root = this.heap[0]
+        console.log(last)
+        this.set(0, last)
         this.bubbleDown(0)
         return root;
     }
        
-    bubbleUp(i, value) {
-        let shouldSwap = value < this.heap[this.parentIndex(i)]  
+    bubbleUp(i, valueObject) {
+        let shouldSwap = this.accessorFn(valueObject) < this.getValue(this.parentIndex(i))  
         if (shouldSwap) {
             this.swap(i, this.parentIndex(i))
-            this.bubbleUp(this.parentIndex(i),value)
+            this.bubbleUp(this.parentIndex(i),valueObject)
         } else {
-            this.heap[i] = value
+            this.heap[i] = valueObject
         }
     }
 
@@ -37,11 +38,11 @@ class BinaryHeap {
         let right = this.rightIndex(i)
         let lowest = i
 
-        if (right <= this.heap.length - 1 && this.heap[right] < this.heap[lowest]) {
+        if (right <= this.heap.length - 1 && this.getValue(right) < this.getValue(lowest)) {
             lowest = this.rightIndex(i)
         } 
         
-        if (left <= this.heap.length - 1 && this.heap[left] < this.heap[lowest]) {
+        if (left <= this.heap.length - 1 && this.getValue(left) < this.getValue(lowest)) {
             lowest = this.leftIndex(i)
         }
 
@@ -49,6 +50,15 @@ class BinaryHeap {
             this.swap(i, lowest)
             this.bubbleDown(lowest)
         }
+    }
+
+    getValue(i) {
+        if (!this.heap[i]) return this.heap[i]
+        return this.accessorFn(this.heap[i])
+    }
+
+    set(i, val) {
+        this.heap[i] = val
     }
 
     lastLeaf() {
