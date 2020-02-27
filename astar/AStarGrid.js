@@ -5,7 +5,8 @@ class AStarGrid {
     g;
     finalCell;
     startingCell;
-    finished = false
+    finished = false;
+    costQueue = new BinaryHeap(5);
 
     constructor(res) {
         this.res = res;

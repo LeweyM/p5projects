@@ -24,6 +24,7 @@ let resetButton;
 let stepButton;
 
 function setup() {
+
 	createCanvas(400, 400);	
 	aStarGrid = new AStarGrid(res);
 	randomWalls()
@@ -110,9 +111,7 @@ function drawAnimatedRoute() {
 	if (displayMode === drawing) {
 		goButton.show();
 
-		if (mouseIsPressed && mouseWithinCanvas()) {
-			drawWallAtMouse()
-		}
+		if (mouseIsPressed && mouseWithinCanvas()) drawWallAtMouse()
 		
 		aStarGrid.draw();
 		loop();
