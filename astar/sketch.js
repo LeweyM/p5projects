@@ -1,7 +1,10 @@
 /// <reference path="./p5.global-mode.d.ts" />
 
-const res = 25;
+const canvasSize = 800
+const res = 200;
+
 let aStarGrid;
+let drawingOptimization = true;
 
 const auto = "AUTO"
 const drawing = "DRAWING"
@@ -22,13 +25,16 @@ const buttonFactory = (title, fn) => {
 let goButton;
 let resetButton;
 let stepButton;
+let drawingOptimizationButton;
 
 function setup() {
 
-	createCanvas(400, 400);	
+	createCanvas(canvasSize, canvasSize);	
 	aStarGrid = new AStarGrid(res);
 	randomWalls()
 
+
+	drawingOptimizationButton = buttonFactory('DrawingOptimization', () => drawingOptimization = !drawingOptimization)
 	goButton = buttonFactory('Go', () => displayMode = animated)
 	pauseButton = buttonFactory('Pause', () => displayMode = stepping)	
 	stepButton = buttonFactory('Step', () => {})
@@ -58,7 +64,7 @@ function randomWalls() {
 		}
 	}
 
-	let wallCount = floor(random(10, 20))
+	let wallCount = floor(random(20, 40))
 	for (let i = 0; i < wallCount; i++) {
 		const x = floor(random(0, res));
 		const y = floor(random(0, res));
@@ -99,10 +105,11 @@ function hideButtons() {
 function drawAutoRoute() {
 	pauseButton.show()
 	if (mouseIsPressed && mouseWithinCanvas()) {
-		aStarGrid.setFinish(floor(mouseX / (400 / res)), floor(mouseY / (400 / res)));
-		console.log("Time taken: ", deltaTime.toFixed(2), " ms");
+		aStarGrid.setFinish(floor(mouseX / (canvasSize / res)), floor(mouseY / (canvasSize / res)));
 	}
-	aStarGrid.fastestRoute();
+	if (!aStarGrid.finished) {
+		aStarGrid.fastestRoute();
+	}
 	aStarGrid.draw();
 	loop();
 }
@@ -144,10 +151,10 @@ function drawAnimatedRoute() {
 
 function drawWallAtMouse() {
 	if (!mouseWithinCanvas()) return;
-	let scale = 400 / res
+	let scale = canvasSize / res
 	let row = floor(mouseX / scale)
 	let col = floor(mouseY / scale)
 	aStarGrid.setWall(row, col)
 }
 
-const mouseWithinCanvas = () => mouseX > 0 && mouseX <= 400 && mouseY > 0 && mouseY <= 400
+const mouseWithinCanvas = () => mouseX >= 0 && mouseX < canvasSize && mouseY >= 0 && mouseY < canvasSize

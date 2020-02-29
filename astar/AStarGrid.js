@@ -6,10 +6,13 @@ class AStarGrid {
     finalCell;
     startingCell;
     finished = false;
-    costQueue = new BinaryHeap(5);
+    costQueue;
+    retrievedFromQueue;
 
     constructor(res) {
         this.res = res;
+        this.costQueue = new BinaryHeap((o) => o.cost);
+        this.retrievedFromQueue = [];
         this.initializeGrid()
     }
 
@@ -22,9 +25,11 @@ class AStarGrid {
     }
 
     fastestRoute() {
+        console.time("calculation")
         while (!this.finished) {
             this.calculateNextCell()
         }
+        console.timeEnd("calculation")
     }
 
     calculateNextCell() {
@@ -36,7 +41,6 @@ class AStarGrid {
         }
 
         this.discoverNeighbours(nextCell)
-        
         this.calculateNeighbours(nextCell)
         
         if (nextCell == this.finalCell) {
@@ -45,7 +49,7 @@ class AStarGrid {
         }
     }
 
-    getLowestValuedCell() {
+    getLowestValuedCellOLD() {
         const cellsByCost = (a, b) => {
             let aCost = a.g + a.h
             let bCost = b.g + b.h
@@ -62,6 +66,19 @@ class AStarGrid {
         return cellsToTry[0]
     }
 
+    getLowestValuedCell() {
+        let costObject = this.costQueue.pop()
+        if (!costObject) return null;
+
+        while (this.retrievedFromQueue[costObject.index]) {
+            costObject = this.costQueue.pop();
+            if (!costObject) return null;
+        }
+        this.retrievedFromQueue[costObject.index] = true
+
+        return this.g[costObject.index]
+    }
+
     calculateNeighbours(parentCell) {
         parentCell.hasBeenTried = true;
         this.getNeighbours(parentCell)
@@ -74,6 +91,9 @@ class AStarGrid {
                     cell.parent = parentCell
                 }
                 cell.h = h;
+
+                let cellCostObject = {index: XYToIndex(cell.x, cell.y), cost: g + h}
+                this.costQueue.push(cellCostObject)
             })
     }
 
@@ -125,7 +145,11 @@ class AStarGrid {
         cell.h = 0
         this.finalCell = cell
 
-        this.startingCell.h = dist(this.startingCell.x, this.startingCell.y, this.finalCell.x, this.finalCell.y)
+        const distanceFromStart = dist(this.startingCell.x, this.startingCell.y, this.finalCell.x, this.finalCell.y);
+        this.startingCell.h = distanceFromStart
+
+        let startingCellCostObject = {index: XYToIndex(this.startingCell.x, this.startingCell.y), cost: distanceFromStart}
+        this.costQueue.push(startingCellCostObject)
     }
 
     draw() {
@@ -150,6 +174,8 @@ class AStarGrid {
         this.startingCell.isDiscovered = true;
         this.startingCell.hasBeenTried = false;
         this.finished = false;
+        this.costQueue = new BinaryHeap((o => o.cost))
+        this.retrievedFromQueue = []
     }
 
     initializeGrid() {
@@ -166,7 +192,7 @@ class AStarGrid {
 }
 
 function cellFromPosition(row, col) {
-    const scale = 400 / res;
+    const scale = canvasSize / res;
     const vec = createVector(row * scale, col * scale);
     return new Cell(row, col, vec);
 }

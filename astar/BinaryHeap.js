@@ -17,7 +17,6 @@ class BinaryHeap {
         let last = this.heap.pop()
         if (this.heap.length == 0) return last
         let root = this.heap[0]
-        console.log(last)
         this.set(0, last)
         this.bubbleDown(0)
         return root;
